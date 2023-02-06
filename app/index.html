@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+</head>
+<body>
+    <div class="container">
+        <div class="card-header">
+            <h1>Selamat Datang</h1>
+        </div>
+        <div class="card-body">
+            <button class="btn btn-sm btn-primary" onclick="sendPesan()">Kirim Pesan </button>
+        </div>
+        <div class="card-footer">
+            <h3>Log Notif</h3>
+                <ul id="message"></ul>
+        </div>
+    </div>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+" crossorigin="anonymous"></script></html>
+
+<script>
+    var ws;
+    function init() {
+        if (ws) {
+          ws.onerror = ws.onopen = ws.onclose = null;
+          ws.close();
+        }
+        ws = new WebSocket('ws:localhost:3000');
+  
+        ws.onopen = () => {
+            $('#message').append($("<li>").text('Connection new client'));
+            console.log('server connection');
+            ws.send(JSON.stringify({type:'callback notif',value:"pesan dari client"}))
+        }
+        ws.onerror = function (event) {
+            console.log(event);
+            $('#message').append($("<li>").text('Connection ada yang error'));
+        };
+        ws.addEventListener('message', function(msg){
+            $('#message').append($("<li>").text(msg.data));
+            console.log(msg.data);
+        })
+
+        ws.onclose = function() {
+            $('#message').append($("<li>").text('Connection close'));
+          ws = null;
+        }
+      }
+
+      init();
+
+      function sendPesan(){
+        var msg= {
+            type :'notif',
+            value: {
+                text:'pesan dari client A',
+                id:1
+            },
+            data : new Date().toLocaleString('en-US', { hour12: false, }),
+        };
+        ws.send(JSON.stringify(msg));
+      }
+</script>
